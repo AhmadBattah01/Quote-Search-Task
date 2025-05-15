@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quote Search Task</title>
+    <style>
+        /* Simple styling - nothing fancy */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        #searchBox {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .quote {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ccc;
+        }
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            font-style: italic;
+            color: #666;
+        }
+        .error {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quote Search Task</h1>
+    
+    <!-- Search box for filtering quotes -->
+    <input type="text" id="searchBox" placeholder="Type to search quotes...">
+    
+    <!-- Container for status messages -->
+    <div id="statusMsg" class="status">Loading quotes, please wait...</div>
+    
+    <!-- Container where quotes will appear -->
+    <div id="quotesList"></div>
+
+    <script>
+        // Global variables to store quotes
+        var allQuotes = [];
+        var filteredQuotes = [];
+        
+        // DOM elements
+        var searchInput = document.getElementById('searchBox');
+        var quotesList = document.getElementById('quotesList');
+        var statusMsg = document.getElementById('statusMsg');
+        
+        // Function to fetch quotes from API
+        function getQuotes() {
+            fetch('https://dummyjson.com/quotes')
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('Failed to load quotes');
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    allQuotes = data.quotes;
+                    statusMsg.style.display = 'none';
+                    displayQuotes(allQuotes);
+                })
+                .catch(function(error) {
+                    statusMsg.innerHTML = '<span class="error">Error: ' + error.message + '</span>';
+                    console.log('Error details:', error);
+                });
+        }
+        
+        // Function to display quotes
+        function displayQuotes(quotes) {
+            quotesList.innerHTML = '';
+            
+            if (quotes.length === 0) {
+                quotesList.innerHTML = '<div class="quote">No quotes found matching your search.</div>';
+                return;
+            }
+            
+            for (var i = 0; i < quotes.length; i++) {
+                var quoteDiv = document.createElement('div');
+                quoteDiv.className = 'quote';
+                quoteDiv.textContent = quotes[i].quote;
+                quotesList.appendChild(quoteDiv);
+            }
+        }
+        
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            var searchText = this.value.toLowerCase();
+            filteredQuotes = allQuotes.filter(function(quote) {
+                return quote.quote.toLowerCase().includes(searchText);
+            });
+            displayQuotes(filteredQuotes);
+        });
+        
+        // Load quotes when page loads
+        window.onload = getQuotes;
+    </script>
+</body>
+</html>
